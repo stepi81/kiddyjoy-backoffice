@@ -14,7 +14,7 @@
                                 <label>&nbsp;</label>
                                 <span class="image"><img src="<?= $subcategory->getImageURL() ?>" alt="KiddyJoy grupe" /></span>
                             </li>
-                            <li>    
+                            <li>
                                 <label>Ime grupe:</label>
                                 <span class="inputField wide"><input type="text" name="name" class="required" value="<?= $subcategory->getName() ?>"/></span>
                             </li>
@@ -31,9 +31,21 @@
                             </li>
                             <li>
 			                    <label>Opis:</label><br /><br /><br />
-			                    <?= $tinymce ?> 
+			                    <?= $tinymce ?>
 			                    <textarea name="other" id="other"><?= $subcategory->getDescription() ?></textarea>
 			               </li>
+                            <li>
+                                <label><b>Seo naslov:</b></label>
+                                <span class="inputField wide"><input type="text" name="seo_title" value="<?= $subcategory->getSeoTitle() ?>"></span>
+                            </li>
+                            <li>
+                                <label>Seo keywords:</label>
+                                <span class="textArea"><textarea name="seo_keywords"><?= $subcategory->getSeoKeywords() ?></textarea></span>
+                            </li>
+                            <li>
+                                <label>Seo opis:</label>
+                                <span class="textArea"><textarea name="seo_description"><?= $subcategory->getSeoDescription() ?></textarea></span>
+                            </li>
                         </ul>
                     </fieldset>
 
@@ -41,9 +53,9 @@
 
                         <span class="button back">
                             <input type="button" value="Nazad" onclick="<?= $this->navigation_manager->backToGrid('subcategoryGrid', 'product/subcategories/groups_listing/' . $subcategory->getCategory()->getID()) ?>" />
-                        </span> 
+                        </span>
                         <span class="button save">
-                            <input type="button" value="Izmeni" onclick="validateForm('subcategoryForm')" /> 
+                            <input type="button" value="Izmeni" onclick="validateForm('subcategoryForm')" />
                         </span>
                         <?php if( isset($message) ) echo $message; ?>
 

@@ -4,7 +4,7 @@
             <h2><?= $grid_title ?></h2>
             <a href="#" class="collapse">Collapse</a>
             <div class="innerContent">
-                <fieldset class="sectionForm half"> 
+                <fieldset class="sectionForm half">
                     <div class="innerContent">
 		                <?= $grid ?>
 		                <table id="grid" style="display:none"></table>
@@ -14,7 +14,7 @@
                  <form method="post" action="<?= site_url( 'product/subcategories/save/' . $category->getID() ) ?>" id="subcategoryForm" enctype="multipart/form-data">
                          <ul>
                            <li style="padding-top: 0px; width:200px;">
-                                <label><b>Grupa:</b></label> 
+                                <label><b>Grupa:</b></label>
                                 <span class="inputField wide"><input type="text" name="name" class="required"></span>
                             </li>
                             <li style="padding-top: 0px; width:200px;">
@@ -30,9 +30,21 @@
                            </li>
                            <li>
 			                    <label>Opis:</label><br /><br /><br />
-			                    <?= $tinymce ?> 
+			                    <?= $tinymce ?>
 			                    <textarea name="other" id="other"></textarea>
 			               </li>
+                             <li style="padding-top: 0px; width:200px;">
+                                 <label><b>Seo naslov:</b></label>
+                                 <span class="inputField wide"><input type="text" name="seo_title"></span>
+                             </li>
+                             <li style="padding-top: 0px; width:200px;">
+                                 <label>Seo keywords:</label>
+                                 <span class="textArea"><textarea name="seo_keywords"></textarea></span>
+                             </li>
+                             <li style="padding-top: 0px; width:200px;">
+                                 <label>Seo opis:</label>
+                                 <span class="textArea"><textarea name="seo_description"></textarea></span>
+                             </li>
                         </ul>
                     </form>
                 </fieldset>
@@ -42,7 +54,7 @@
                         <input type="button" value="Nazad" onclick="<?= $this->navigation_manager->backToGrid('categoriesGrid', 'product/categories/listing') ?>" />
                     </span>
                     <span class="button save">
-                        <input type="button" value="Snimi" onclick="validateForm('subcategoryForm')"/> 
+                        <input type="button" value="Snimi" onclick="validateForm('subcategoryForm')"/>
                     </span>
                     <br>
                     <li>
@@ -54,4 +66,3 @@
         </li>
     </ul>
 </div>
-                            
