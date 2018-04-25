@@ -1,7 +1,7 @@
 <div id="content">
     <ul>
-        <form id="productForm" method="post" action="<?= site_url( 'products/edit/'.$product->getID() ) ?>" enctype="multipart/form-data">    
-	        <li>                      
+        <form id="productForm" method="post" action="<?= site_url( 'products/edit/'.$product->getID() ) ?>" enctype="multipart/form-data">
+	        <li>
 	            <h2>Detalji proizvoda</h2>
 	            <a href="#" class="collapse">Collapse</a>
 	              <div class="innerContent">
@@ -22,14 +22,17 @@
                 <div class="borderTop">
                     <span class="button back">
                         <input type="button" value="Nazad" onclick="<?= $this->navigation_manager->backToGrid('productsGrid', 'products/listing/' . $product->getCategory()->getID()) ?>" />
-                    </span> 
+                    </span>
                     <span class="button save">
-                        <input type="button" value="Izmeni" onclick="validateForm('productForm')" /> 
+                        <input type="button" value="Izmeni" onclick="validateForm('productForm')" />
+                    </span>
+                    <span class="button save">
+                        <a style="position:relative;top:8px;left:52px;font-size:14px" href="<?= site_url( 'products/clone_product_details/'.$product->getID()) ?>">Kloniraj</a>
                     </span>
                     <?php if( isset($message) ) echo $message; ?>
                 </div>
             </div>
         </li>
-        </form> 
+        </form>
     </ul>
 </div>

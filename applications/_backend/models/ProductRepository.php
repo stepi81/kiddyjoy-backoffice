@@ -17,6 +17,7 @@
 
     private $relations = array(
         'id'               => 'p.id',
+        'manufacturer_id'  => 'p.manufacturer_id',
         'vendor'		   => 'p.vendor',
         'status'           => 'p.status',
         'brand'            => 'b.name',
@@ -82,6 +83,7 @@
             $data['record_items'][] = array(
                 $product->getID(),
                 $product->getID(),
+                $product->getManufacturerID(),
                 //$product->getManufacturerID(),
                 $product->getVendor(),
                 $product->getBrandName(),
@@ -91,6 +93,7 @@
 
 				'<a href="'.site_url( 'products/gallery/'.$product->getID() ).'"><img border="0" src="'.layout_url('flexigrid/gallery.png').'"></a>',
                 '<a href="'.site_url('products/details/'.$product->getID()).'"><img border="0" src="'.layout_url('flexigrid/details.png').'"></a>',
+                '<a href="'.site_url('products/clone_product_details/'.$product->getID()).'"><img border="0" src="'.layout_url('flexigrid/clone-icon.png').'"></a>',
 
                 $product->getStatisticSold(),
                 $product->getStatisticVisits(),
@@ -467,7 +470,7 @@
          $qb = $this->_em->createQueryBuilder();
 
          $qb->select(array(
-             'partial p.{id, vendor, manufacturer_id, name, price, statistic_visits, statistic_votes, statistic_rating, status}',
+             'partial p.{id, vendor, manufacturer_id, name, price, old_price, statistic_visits, statistic_votes, statistic_rating, status, promotion}',
              //'partial m.{id, master_id, name, price}',
              'partial b.{id, name}',
              'partial c.{id, name}',

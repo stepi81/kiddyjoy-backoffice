@@ -193,6 +193,7 @@
 
 		$colModel['galery'] = array('Galerija', 50, FALSE, 'center', 0);
         $colModel['details'] = array('Detalji', 50, FALSE, 'center', 0);
+        $colModel['clone'] = array('Kloniranje', 50, FALSE, 'center', 0);
 
         $colModel['statistic_sold'] = array( 'Prodato', 50, TRUE, 'center', 0 );
         $colModel['statistic_visits'] = array( 'Posete', 50, TRUE, 'center', 0 );
@@ -354,15 +355,35 @@
 
          foreach($products as $product)
          {
-             $product_name = $product->getName();
+             $product_name = str_replace(',', ' ', $product->getName());
              $product_brand = $product->getBrand();
              $subcategory = $product->getSubcategory();
+             $category = $product->getCategory();
 
              if($product_name != ''){
 
-                 $brand = ($product_brand) ? $product_brand->getName() : null;
-                 $product_subcategory = ($subcategory) ? $subcategory->getName() : null;
-                     array_push($list, array('brand'=>$brand, 'vendor' => $product->getVendor(), 'subcategory' => $product_subcategory, 'name' => $product_name, 'id'=>$product->getID(), 'masterid'=> $product->getManufacturerID(), 'visits' => $product->getStatisticVisits(), 'votes' => $product->getStatisticVotes(), 'rating' => $product->getStatisticRating(), 'price' => $product->getPrice(), 'status' => $product->getStatus()));
+                 $brand = ($product_brand) ? $product_brand->getName() : '';
+                 if($category) {
+                     $product_category = str_replace('<br />', ' ', $category->getName());
+                     $product_category = str_replace('<br>', ' ', $product_category);
+                     $product_category = str_replace(',', ' ', $product_category);
+                 } else {
+                     $product_category = '';
+                 }
+                 if($subcategory) {
+                     if($subcategory->getParent()) {
+                         $product_group = str_replace(',', ' ', $subcategory->getParent()->getName());
+                         $product_subcategory = str_replace(',', ' ', $subcategory->getName());
+                     } else {
+                         $product_group = str_replace(',', ' ', $subcategory->getName());
+                         $product_subcategory = '';
+                     }
+                 } else {
+                     $product_group = '';
+                     $product_subcategory = '';
+                 }
+
+                 array_push($list, array('brand'=>$brand, 'vendor' => $product->getVendor(), 'category' => $product_category, 'group' => $product_group, 'subcategory' => $product_subcategory, 'name' => $product_name, 'id'=>$product->getID(), 'masterid'=> $product->getManufacturerID(), 'visits' => $product->getStatisticVisits(), 'votes' => $product->getStatisticVotes(), 'rating' => $product->getStatisticRating(), 'price' => $product->getPrice(), 'promotion' => $product->getPromotion(), 'old_price' => $product->getOldPrice(), 'status' => $product->getStatus()));
 
              }
          }
@@ -373,7 +394,7 @@
          /* EXCEL */
          $csv 	= 'Datum:' . $date . "\t" . "\t" . "\t". '' . "\t" . ''. "\t" . ''. "\n";
          $csv 	.= '' . "\t" . '' . "\t" . '' . "\t" . '' . "\t" . '' . "\n";
-         $csv 	.= 'ID' . "\t" . 'DOBAVLJAC' . "\t" . 'MASTER ID' . "\t" . 'BREND' . "\t" . 'PODKATEGORIJA' . "\t" . 'NAZIV' . "\t" . 'CENA' . "\t" . 'POSETE' . "\t" . 'REJTING' . "\t" . 'OCENE' . "\t" . 'STATUS' . "\n";
+         $csv 	.= 'ID' . "\t" . 'DOBAVLJAC' . "\t" . 'MASTER ID' . "\t" . 'BREND' . "\t" . 'KATEGORIJA' . "\t" . 'GRUPA' . "\t" . 'PODKATEGORIJA' . "\t" . 'NAZIV' . "\t" . 'CENA' . "\t" . 'STARA CENA' . "\t" . 'AKCIJA' . "\t" . 'POSETE' . "\t" . 'REJTING' . "\t" . 'OCENE' . "\t" . 'STATUS' . "\n";
 
          foreach($list as $p) {
              if($p['status'] == 1) {
@@ -381,7 +402,7 @@
              } else {
                  $status = 'Neaktivan';
              }
-             $csv .= $p['id'] . "\t" . $p['vendor'] . "\t" . $p['masterid'] . "\t" . $p['brand'] . "\t" . $p['subcategory'] . "\t" . $p['name'] . "\t" . $p['price'] . "\t" . $p['visits'] . "\t" . $p['rating'] . "\t" . $p['votes'] . "\t" . $status . "\n";
+             $csv .= $p['id'] . "\t" . $p['vendor'] . "\t" . $p['masterid'] . "\t" . $p['brand'] . "\t" . $p['category'] . "\t" . $p['group'] . "\t" . $p['subcategory'] . "\t" . $p['name'] . "\t" . $p['price'] . "\t" . $p['old_price'] . "\t" . $p['promotion'] . "\t" . $p['visits'] . "\t" . $p['rating'] . "\t" . $p['votes'] . "\t" . $status . "\n";
          }
 
          $encoded_csv = mb_convert_encoding($csv, 'UTF-16LE', 'UTF-8');
@@ -1280,13 +1301,92 @@
              }*/
 
              $data['message'] = '<p class="message_success">Uspešno ste klonirali proizvod.</p>';
+             redirect( 'products/details/'.$cloned->getID() );
 
          } else {
              $data['message'] = '<p class="message_error">Proizvod ne postoji! Pokušajte ponovo.</p>';
+             $this->_render_view( 'clone_product_view', $data );
+         }
+     }
+
+     public function clone_product_details($id) {
+         if( $data['product'] = $this->em->getRepository('models\Entities\Product')->find($id) ) {
+
+             $cloned = new Product();
+             $cloned->setName( $data['product']->getName() );
+             $cloned->setPrice( $data['product']->getPrice() );
+             $cloned->setStatus( 0 );
+
+             $cloned->setBrand($this->em->getReference('models\Entities\Product\Brand', $data['product']->getBrand()->getID()));
+             $cloned->setCategory($this->em->getReference('models\Entities\Product\Category', $data['product']->getCategory()->getID()));
+             $cloned->setSubcategory($this->em->getReference('models\Entities\Product\Subcategory', $data['product']->getSubcategory()->getID()));
+             $cloned->setDescription( $data['product']->getDescription() );
+             $cloned->setManufacturerID( $data['product']->getManufacturerID() );
+             if( $data['product']->getSticker() ) {
+                 $cloned->setSticker($this->em->getReference('models\Entities\Product\Sticker', $data['product']->getSticker()->getID()));
+                 $cloned->setStickers($this->em->getReference('models\Entities\Product\Sticker', $data['product']->getSticker()->getID()));
+             }
+             $cloned->setVendor( $data['product']->getVendor() );
+             $cloned->setVat( $data['product']->getVat() );
+             $cloned->setOldPrice( $data['product']->getOldPrice() );
+             $cloned->setPriceRetail( $data['product']->getPriceRetail() );
+             $cloned->setOther( $data['product']->getOther() );
+             $cloned->setInformation( $data['product']->getInformation() );
+             $cloned->setFeatured( $data['product']->getFeatured() );
+             $cloned->setPromotion( $data['product']->getPromotion() );
+
+             $this->em->persist($cloned);
+             $this->em->flush();
+
+             foreach($data['product']->getProductFilters() as $filter) {
+                 $cloned->setProductFilter($this->em->getReference('models\Entities\Product\Filter', $filter->getID()));
+             }
+
+             $this->em->persist($cloned);
+             $this->em->flush();
+
+             foreach ($data['product']->getProductTextFilters() as $text_filter) {
+                 $data['textFilter'] = new TextFilter();
+                 $data['textFilter']->setProduct($this->em->getReference('models\Entities\Product', $cloned->getID() ));
+                 $data['textFilter']->setDescription($text_filter->getDescription());
+                 $data['textFilter']->setSpecification($this->em->getReference('models\Entities\Product\Specification', $text_filter->getSpecification()->getID()));
+                 $this->em->persist($data['textFilter']);
+                 $this->em->flush();
+             }
+
+             //$cloned = clone($data['product']);
+             //$cloned->setID(NULL);
+             //$cloned->setStatus(0);
+             //$this->em->persist($cloned);
+             //$this->em->flush();
+
+             /*foreach($data['product']->getProductFilters() as $filter) {
+                 $cloned->setProductFilter($this->em->getReference('models\Entities\Product\Filter', $filter->getID()));
+             }*/
+
+             //$this->em->persist($cloned);
+             //$this->em->flush();
+
+             /*foreach ($data['product']->getProductTextFilters() as $text_filter) {
+                 $data['textFilter'] = new TextFilter();
+                 $data['textFilter']->setProduct($this->em->getReference('models\Entities\Product', $cloned->getID() ));
+                 $data['textFilter']->setDescription($text_filter->getDescription());
+                 $data['textFilter']->setSpecification($this->em->getReference('models\Entities\Product\Specification', $text_filter->getSpecification()->getID()));
+                 $this->em->persist($data['textFilter']);
+                 $this->em->flush();
+             }*/
+
+             $data['message'] = '<p class="message_success">Uspešno ste klonirali proizvod.</p>';
+             redirect( 'products/details/'.$cloned->getID() );
+
+         } else {
+             $data['message'] = '<p class="message_error">Proizvod ne postoji! Pokušajte ponovo.</p>';
+             $this->_render_view( 'clone_product_view', $data );
          }
 
-         $this->_render_view( 'clone_product_view', $data );
-     }
+         //$this->_render_view( 'clone_product_view', $data );
+         //redirect($this->navigation_manager->backToGrid('productsGrid', 'products/listing/' . $product->getCategory()->getID()));
+    }
  }
 
  /* End of file products.php */
