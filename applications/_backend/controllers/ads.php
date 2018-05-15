@@ -158,6 +158,15 @@ class Ads extends MY_Controller {
         } else {
             $position=$maxPosition + 1;
         }
+
+        if ($category == 'Body slide') {
+            $category = 'filter_small';
+        }
+
+        if ($category == 'Body footer') {
+            $category = 'filter';
+        }
+
 		if( ( $this->input->post('vendor_id') == 10 || $this->session->userdata('application_id') == 10 ) ) {
         	$upload_config['upload_path'] = SERVER_IMAGE_PATH . 'ads/' . $category . '/mobile';
 		} else {
@@ -492,6 +501,14 @@ class Ads extends MY_Controller {
             $old_image_name=$data['ad']->getImageName();
             if ($_FILES["image"]["size"] > 0) {
 
+                if ($category == 'Body slide') {
+                    $category = 'filter_small';
+                }
+
+                if ($category == 'Body footer') {
+                    $category = 'filter';
+                }
+
                 if( $this->input->post('vendor_id') == 10 || $this->session->userdata('application_id') == 10 ) {
 		        	$upload_config['upload_path'] = SERVER_IMAGE_PATH . 'ads/' . $category . '/mobile/';
 				} else {
@@ -527,6 +544,7 @@ class Ads extends MY_Controller {
                     }
                     $data['ad']->setSource($image['file_name']);
                 } else {
+
                     $data['message']='<p class="message_error">Došlo je do greške! Molimo Vas proverite unetu sliku.</p>';
                     goto end;
                 }
